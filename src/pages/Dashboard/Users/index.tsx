@@ -4,15 +4,18 @@ import Card from '../../../components/Card';
 import * as S from './styled';
 import { useUser } from '../../../context/users';
 
-import urlDefaultImage from '../../../assets/theme/default-user-image.png';
-
 import { useBottomView } from '../../../context/bottomView';
 
 const Users: React.FC = () => {
   const { listUser } = useUser();
   const users = listUser();
 
-  const { toogleBottomView } = useBottomView();
+  const { toogleBottomView, clearUser } = useBottomView();
+
+  const createUser = () => {
+    clearUser();
+    toogleBottomView();
+  };
 
   return (
     <S.UsersWrapper>
@@ -23,7 +26,7 @@ const Users: React.FC = () => {
             <h1>Usuários</h1>
           </div>
 
-          <button onClick={toogleBottomView}>
+          <button onClick={createUser}>
             <FiPlus size={18} />
             <span>adicionar</span>
           </button>
@@ -36,15 +39,19 @@ const Users: React.FC = () => {
         </S.TableHead>
 
         <S.TableBody>
-          {users.map(user => (
-            <Card
-              key={user.id}
-              id={user.id}
-              pathImage={urlDefaultImage}
-              name={user.name}
-              email={user.email}
-            />
-          ))}
+          {users.length ? (
+            users.map(user => (
+              <Card
+                key={user.id}
+                id={user.id}
+                avatar={user.avatar}
+                name={user.name}
+                email={user.email}
+              />
+            ))
+          ) : (
+            <p>carregando...</p>
+          )}
         </S.TableBody>
       </S.UserContainer>
     </S.UsersWrapper>

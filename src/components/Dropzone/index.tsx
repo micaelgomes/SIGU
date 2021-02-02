@@ -5,25 +5,31 @@ import * as S from './styled';
 
 interface DropzoneProps {
   image?: string | null;
+  setImageToUpload(file: File): void;
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({ image }) => {
+const Dropzone: React.FC<DropzoneProps> = ({ image, setImageToUpload }) => {
   const [pathimagePreview, setPathImagePreview] = useState(() => {
     if (image) return image;
 
     return '';
   });
 
-  const onDrop = useCallback(acceptedFiles => {
-    const arrayFiles = acceptedFiles.map((file: object) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      }),
-    );
+  const onDrop = useCallback(
+    acceptedFiles => {
+      setImageToUpload(acceptedFiles[0]);
 
-    const file = arrayFiles[0];
-    setPathImagePreview(file.preview);
-  }, []);
+      const arrayFiles = acceptedFiles.map((file: object) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        }),
+      );
+
+      const file = arrayFiles[0];
+      setPathImagePreview(file.preview);
+    },
+    [setImageToUpload],
+  );
 
   const {
     getRootProps,

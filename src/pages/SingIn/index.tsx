@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import Input from '../../components/Input';
 import getValidationError from '../../utils/getValidationErrors';
 import { useAuth } from '../../context/auth';
+import { useToast } from '../../context/toast';
 
 import * as S from './styled';
 import Button from '../../components/Button';
@@ -18,6 +19,8 @@ interface SingCredentials {
 
 const SingIn: React.FC = () => {
   const { signIn } = useAuth();
+  const { addToast } = useToast();
+
   const formRef = useRef<FormHandles>(null);
 
   const handleSubmit = useCallback(
@@ -42,14 +45,26 @@ const SingIn: React.FC = () => {
           email: data.email,
           password: data.password,
         });
+
+        addToast({
+          type: 'success',
+          title: 'Tudo certo no login',
+        });
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationError(err);
           formRef.current?.setErrors(errors);
+
+          return;
         }
+
+        addToast({
+          type: 'error',
+          title: 'Opa... Algo deu errado',
+        });
       }
     },
-    [signIn],
+    [addToast, signIn],
   );
 
   return (

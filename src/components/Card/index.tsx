@@ -5,16 +5,18 @@ import { useUser } from '../../context/users';
 import { useAuth } from '../../context/auth';
 import { useBottomView } from '../../context/bottomView';
 
+import urlDefaultImage from '../../assets/theme/default-user-image.png';
+
 import * as S from './styled';
 
 interface CardProps {
   id: string;
-  pathImage?: string;
+  avatar?: string;
   name: string;
   email: string;
 }
 
-const Card: React.FC<CardProps> = ({ id, pathImage, name, email }) => {
+const Card: React.FC<CardProps> = ({ id, avatar, name, email }) => {
   const { deleteUser } = useUser();
   const { user } = useAuth();
   const { toogleBottomView, setUser } = useBottomView();
@@ -29,7 +31,7 @@ const Card: React.FC<CardProps> = ({ id, pathImage, name, email }) => {
       }
     } else {
       // eslint-disable-next-line no-alert
-      window.alert('Você não pode deletar por aqui');
+      window.alert('Você não pode deletar sua conta por aqui');
     }
   };
 
@@ -37,7 +39,7 @@ const Card: React.FC<CardProps> = ({ id, pathImage, name, email }) => {
     setUser({
       id,
       name,
-      filename: pathImage,
+      avatar,
       email,
     });
 
@@ -46,7 +48,10 @@ const Card: React.FC<CardProps> = ({ id, pathImage, name, email }) => {
 
   return (
     <S.CardWrapper>
-      <img src={pathImage} alt="user talz" />
+      <img
+        src={avatar ? `http://localhost:3333/files/${avatar}` : urlDefaultImage}
+        alt={name}
+      />
       <h5>{name}</h5>
       <p>{email}</p>
       <div>

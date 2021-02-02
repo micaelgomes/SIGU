@@ -8,11 +8,11 @@ import React, {
 } from 'react';
 import BottomView from '../components/BottomView';
 
-interface UserModel {
+export interface UserModel {
   id: string;
   email: string;
   name: string;
-  filename?: string;
+  avatar?: string;
   createAt?: string;
   updateAt?: string;
 }
@@ -20,6 +20,7 @@ interface UserModel {
 interface BottomViewData {
   stateBottomView: boolean;
   toogleBottomView(): void;
+  clearUser(): void;
   setUser: Dispatch<SetStateAction<UserModel>>;
 }
 
@@ -31,17 +32,19 @@ const BottomViewProvider: React.FC = ({ children }) => {
 
   console.log(user);
 
+  const clearUser = useCallback(() => setUser({} as UserModel), []);
+
   const toogleBottomView = useCallback(() => setOpened(!opened), [opened]);
 
   return (
     <BottomViewContext.Provider
-      value={{ stateBottomView: opened, toogleBottomView, setUser }}
+      value={{ stateBottomView: opened, toogleBottomView, setUser, clearUser }}
     >
       {children}
       <BottomView
         statusBottomView={opened}
         toogleBottomView={toogleBottomView}
-        user={user}
+        user={user || {}}
       />
     </BottomViewContext.Provider>
   );

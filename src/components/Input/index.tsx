@@ -52,15 +52,15 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
       <S.InputWrapper
         isErrored={!!error}
         isFilled={isFilled}
-        onFocus={handleChangeFocus}
-        onBlur={handleChangeBlur}
         isFocused={isFocused}
       >
         <input
+          name={name}
           ref={inputRef}
           defaultValue={defaultValue}
+          onFocus={handleChangeFocus}
+          onBlur={handleChangeBlur}
           type="text"
-          name={name}
           {...rest}
         />
         {Icon && <Icon size={18} />}

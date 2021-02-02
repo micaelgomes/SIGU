@@ -3,10 +3,11 @@ import { FiMail, FiLock, FiCheck, FiUser } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import Input from '../../components/Input';
 import getValidationError from '../../utils/getValidationErrors';
 import { useAuth } from '../../context/auth';
+import { useToast } from '../../context/toast';
 
 import * as S from './styled';
 import Button from '../../components/Button';
@@ -20,6 +21,8 @@ interface SingUpData {
 const SingUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { signUp } = useAuth();
+  const { addToast } = useToast();
+  const { push } = useHistory();
 
   const handleSubmit = useCallback(
     async (data: SingUpData) => {
@@ -45,6 +48,13 @@ const SingUp: React.FC = () => {
           email: data.email,
           password: data.password,
         });
+
+        addToast({
+          type: 'success',
+          title: 'Conta criada com sucesso',
+        });
+
+        push('/');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationError(err);
@@ -52,11 +62,14 @@ const SingUp: React.FC = () => {
 
           return;
         }
-      }
 
-      console.log(data);
+        addToast({
+          type: 'error',
+          title: 'Email já existe',
+        });
+      }
     },
-    [signUp],
+    [addToast, push, signUp],
   );
 
   return (

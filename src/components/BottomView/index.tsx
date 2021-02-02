@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { FiXCircle, FiUser, FiMail, FiLock, FiUserCheck } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
@@ -7,13 +7,17 @@ import Dropzone from '../Dropzone';
 import Input from '../Input';
 import getValidationError from '../../utils/getValidationErrors';
 import { useUser } from '../../context/users';
+import { useToast } from '../../context/toast';
 
 import * as S from './styled';
 import Button from '../Button';
 
 interface UserModel {
+  id: string;
   name: string;
   email: string;
+  password?: string;
+  image?: string;
 }
 
 interface BottomViewProps {
@@ -34,20 +38,19 @@ const BottomView: React.FC<BottomViewProps> = ({
   user,
 }) => {
   const formRef = useRef<FormHandles>(null);
-  const { addUser } = useUser();
+  const { addUser, updateUser, updateAvatarUser } = useUser();
+  const { addToast } = useToast();
+
+  const [imageItem, setImageItem] = useState<File>();
 
   const handleSubmit = useCallback(
     async (data: SingCredentials) => {
       formRef.current?.setErrors({});
 
       const schema = Yup.object().shape({
-        name: Yup.string().required('Nome obrigatório'),
-        email: Yup.string()
-          .required('Email obrigatório')
-          .email('Este email é  inválido'),
-        password: Yup.string()
-          .min(6, 'Senha deve ter no mínimo 6 caracteres.')
-          .required('Senha obrigatória'),
+        name: Yup.string(),
+        email: Yup.string().email('Este email é  inválido'),
+        password: Yup.string().min(6, 'Senha deve ter no mínimo 6 caracteres.'),
       });
 
       try {
@@ -55,11 +58,29 @@ const BottomView: React.FC<BottomViewProps> = ({
           abortEarly: false,
         });
 
-        await addUser({
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        });
+        if (!user.id) {
+          await addUser({
+            name: data.name,
+            email: data.email,
+            password: data.password,
+          });
+
+          addToast({
+            type: 'info',
+            title: 'Usuário criado com sucesso',
+          });
+        } else {
+          await updateUser({
+            id: user.id,
+            name: data.name,
+            email: data.email,
+            password: data.password,
+          });
+
+          if (imageItem) {
+            updateAvatarUser(imageItem, user.id);
+          }
+        }
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationError(err);
@@ -67,11 +88,24 @@ const BottomView: React.FC<BottomViewProps> = ({
 
           return;
         }
+
+        addToast({
+          type: 'error',
+          title: 'Opa.. algo deu errado.',
+        });
       }
 
-      console.log(data);
+      toogleBottomView();
     },
-    [addUser],
+    [
+      addToast,
+      addUser,
+      imageItem,
+      toogleBottomView,
+      updateAvatarUser,
+      updateUser,
+      user.id,
+    ],
   );
 
   return (
@@ -84,7 +118,7 @@ const BottomView: React.FC<BottomViewProps> = ({
       <S.BottomViewWrapper statusBottomView={statusBottomView}>
         <S.BottomViewHeader>
           <header>
-            <h5>Adicionar um novo usuário</h5>
+            <h5>{!user.id ? 'Adicionar um novo usuário' : 'Editar usuário'}</h5>
 
             <button onClick={toogleBottomView}>
               <FiXCircle size={24} />
@@ -99,7 +133,7 @@ const BottomView: React.FC<BottomViewProps> = ({
             onSubmit={handleSubmit}
           >
             <section>
-              <Dropzone />
+              <Dropzone image={user.image} setImageToUpload={setImageItem} />
             </section>
 
             <section>
@@ -123,7 +157,7 @@ const BottomView: React.FC<BottomViewProps> = ({
               />
               <Button
                 type="submit"
-                label="adicionar usuário"
+                label={!user.id ? 'adicionar usuário' : 'atualizar usuário'}
                 icon={FiUserCheck}
               />
             </section>

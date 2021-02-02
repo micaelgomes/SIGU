@@ -63,15 +63,11 @@ const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signUp = useCallback(async ({ name, email, password }: SignUpData) => {
-    const response = await api.post<AuthState>('/users', {
+    await api.post<AuthState>('/users', {
       name,
       email,
       password,
     });
-
-    const user = response.data;
-
-    console.log(user);
   }, []);
 
   const signOut = useCallback(() => {
